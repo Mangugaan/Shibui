@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#13111c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SHIBUI">
+  <title>S H I B U I ✦ Anime Notebook</title>
+  <link id="pwa-manifest" rel="manifest">
+  <link id="apple-icon" rel="apple-touch-icon">
+
+  <style>
+    :root {
+      --bg-dark: #13111c;
+      --panel-bg: rgba(24, 21, 36, 0.96);
+      --sakura: #f472b6;
+      --sakura-glow: rgba(244, 114, 182, 0.35);
+      --cyber-blue: #38bdf8;
+      --text-main: #fdf2f8;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-dark);
+      font-family: "Rounded Mplus 1c", "Quicksand", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      touch-action: none;
+      overscroll-behavior: none;
+    }
+
+    /* Top Toolbar */
+    .toolbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(90deg, #151221 0%, #1f1930 50%, #151221 100%);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      gap: 8px;
+      z-index: 1000;
+      overflow-x: auto;
+      border-bottom: 2px solid #332a4d;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.55);
+    }
+
+    .toolbar::-webkit-scrollbar { height: 3px; }
+    .toolbar::-webkit-scrollbar-thumb { background: var(--sakura); border-radius: 3px; }
+
+    /* SHIBUI Brand Logo */
+    .brand-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #ec4899, #7c3aed);
+      padding: 4px 12px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px var(--sakura-glow);
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      cursor: pointer;
+    }
+
+    .brand-title {
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #fff;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    .brand-sub {
+      font-size: 8.5px;
+      color: #fce7f3;
+      letter-spacing: 0.8px;
+      font-weight: 700;
+    }
+
+    .tool-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding-right: 8px;
+      border-right: 1px solid #352d4d;
+      flex-shrink: 0;
+    }
+
+    .tool-group:last-child { border-right: none; }
+
+    button, select {
+      background: #252038;
+      color: #f3e8ff;
+      border: 1px solid #433963;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    button:active { transform: scale(0.95); }
+
+    button.active {
+      background: linear-gradient(135deg, #ec4899, #a855f7);
+      color: #ffffff;
+      border-color: #f9a8d4;
+      box-shadow: 0 0 10px var(--sakura-glow);
+    }
+
+    button.zoom-btn.active {
+      background: linear-gradient(135deg, #059669, #10b981);
+      border-color: #6ee7b7;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    }
+
+    button.pdf-btn {
+      background: linear-gradient(135deg, #e11d48, #be123c);
+      border-color: #fda4af;
+      color: #fff;
+    }
+
+    button.lib-btn {
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      border-color: #93c5fd;
+      color: #fff;
+    }
+
+    /* Millimeter Preset Chips */
+    .mm-chip {
+      padding: 4px 7px;
+      font-size: 11px;
+      border-radius: 8px;
+      background: #1d192b;
+      color: #cbd5e1;
+      border: 1px solid #383052;
+    }
+
+    .mm-chip.active {
+      background: #38bdf8;
+      color: #0f172a;
+      border-color: #bae6fd;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+    }
+
+    .mm-display {
+      font-size: 11.5px;
+      font-weight: 800;
+      color: #f472b6;
+      min-width: 44px;
+      text-align: center;
+      font-family: monospace;
+    }
+
+    input[type="range"] {
+      width: 66px;
+      accent-color: #ec4899;
+      cursor: pointer;
+    }
+
+    /* Color Swatches */
+    .color-swatch {
+      width: 23px;
+      height: 23px;
+      border-radius: 50%;
+      border: 2px solid #4a4069;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: transform 0.12s;
+    }
+
+    .color-swatch.active {
+      border-color: #ffffff;
+      transform: scale(1.22);
+      box-shadow: 0 0 10px var(--sakura);
+    }
+
+    /* Main Writing Stage */
+    #stage {
+      position: relative;
+      width: 100vw;
+      height: calc(100vh - 60px);
+      margin-top: 60px;
+      touch-action: none;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+
+    #bg-canvas { z-index: 1; }
+    #ink-canvas { z-index: 2; }
+    #ui-canvas { z-index: 3; pointer-events: none; }
+
+    /* Side-Mounted 1-100 Page Navigator Dock */
+    .side-page-dock {
+      position: fixed;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--panel-bg);
+      border: 1.5px solid #4a3e6d;
+      padding: 8px 6px;
+      border-radius: 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 920;
+      box-shadow: -4px 6px 20px rgba(0, 0, 0, 0.55);
+    }
+
+    .side-page-dock button {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 13px;
+      background: #2a2440;
+      border-color: #524578;
+    }
+
+    .side-page-indicator {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      color: #fdf2f8;
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      padding: 6px 2px;
+      cursor: pointer;
+      text-align: center;
+      border-top: 1px solid #383052;
+      border-bottom: 1px solid #383052;
+    }
+
+    /* Bottom Zoom Writing Pad */
+    #zoom-pad-container {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      right: 60px;
+      height: 205px;
+      background: #161324;
+      border: 2px solid #f472b6;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      z-index: 850;
+      box-shadow: 0 -6px 28px rgba(0, 0, 0, 0.65);
+      overflow: hidden;
+    }
+
+    .zoom-pad-header {
+      height: 34px;
+      background: linear-gradient(90deg, #3b1d38, #241734);
+      color: #fdf2f8;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      border-bottom: 1px solid #582c52;
+    }
+
+    .zoom-pad-header button {
+      padding: 3px 9px;
+      font-size: 11px;
+      background: #4a2346;
+      border-color: #f472b6;
+      border-radius: 7px;
+    }
+
+    #zoom-canvas-wrap {
+      position: relative;
+      flex: 1;
+      width: 100%;
+    }
+
+    #zoom-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+
+    /* In-App Saved Notebooks Library Modal */
+    #library-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 8, 18, 0.85);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 16px;
+    }
+
+    .library-card {
+      background: #1a162b;
+      border: 2px solid #ec4899;
+      border-radius: 18px;
+      width: 100%;
+      max-width: 580px;
+      max-height: 82vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+      color: #fff;
+    }
+
+    .library-header {
+      padding: 14px 18px;
+      background: linear-gradient(90deg, #2d1b3d, #1f1633);
+      border-bottom: 1px solid #43305c;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .library-header h2 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: 1px;
+      color: #fdf2f8;
+    }
+
+    .library-body {
+      padding: 14px 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .note-item {
+      background: #25203b;
+      border: 1px solid #3f3663;
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .note-item.current-open {
+      border-color: #f472b6;
+      background: #2f2242;
+    }
+
+    .note-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .note-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #fdf2f8;
+    }
+
+    .note-meta {
+      font-size: 11.5px;
+      color: #a78bfa;
+    }
+
+    .note-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .status-toast {
+      position: fixed;
+      top: 72px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(24, 21, 36, 0.96);
+      color: #fdf2f8;
+      border: 1.5px solid var(--sakura);
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 12.5px;
+      font-weight: 700;
+      z-index: 3000;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      opacity: 0;
+      box-shadow: 0 4px 15px rgba(244, 114, 182, 0.25);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar" id="top-toolbar">
+    <!-- SHIBUI Brand Badge -->
+    <div class="brand-badge" onclick="openLibraryModal()" title="Tap to view Saved Notes">
+      <span class="brand-title">S H I B U I</span>
+      <span class="brand-sub" id="current-note-name">渋い ✦ NOTE #1</span>
+    </div>
+
+    <!-- In-App Editable Library & Save -->
+    <div class="tool-group">
+      <button class="lib-btn" onclick="openLibraryModal()">📚 My Notes</button>
+      <button onclick="saveToAppLibrary()" style="background:#059669; border-color:#34d399;">💾 Save</button>
+    </div>
+
+    <!-- Smart Page 1-to-N Exporters (PDF & PNG) -->
+    <div class="tool-group">
+      <button class="pdf-btn" onclick="exportWrittenPagesPDF()" title="Exports Page 1 to Last Written Page as PDF">📄 PDF (1–N)</button>
+      <button onclick="exportWrittenPagesPNG()" title="Exports Page 1 to Last Written Page as PNG">🖼️ PNG (1–N)</button>
+    </div>
+
+    <!-- Writing Tools: Ballpoint, Highlighter, Eraser -->
+    <div class="tool-group">
+      <button id="btn-pen" class="active" onclick="setTool('pen')">✒️ Pen</button>
+      <button id="btn-highlighter" onclick="setTool('highlighter')">🖍️ Highlighter</button>
+      <button id="btn-eraser" onclick="setTool('eraser')">🧹 Eraser</button>
+    </div>
+
+    <!-- Thickness (0.5mm to 5.0mm for Pen / 2mm to 15mm for Highlighter) -->
+    <div class="tool-group">
+      <button class="mm-chip" onclick="setQuickMM(0.5)">0.5</button>
+      <button class="mm-chip active" onclick="setQuickMM(1.0)">1.0</button>
+      <button class="mm-chip" onclick="setQuickMM(2.5)">2.5</button>
+      <button class="mm-chip" onclick="setQuickMM(5.0)">5.0</button>
+      <input type="range" id="size-slider" min="0.5" max="5.0" value="1.0" step="0.1" oninput="onSliderChange(this.value)">
+      <span class="mm-display" id="mm-label">1.0mm</span>
+    </div>
+
+    <!-- Color Palette -->
+    <div class="tool-group">
+      <div class="color-swatch active" id="swatch-white" style="background: #ffffff;" onclick="setColor('#ffffff', this)"></div>
+      <div class="color-swatch" id="swatch-black" style="background: #1e1b2e;" onclick="setColor('#1e1b2e', this)"></div>
+      <div class="color-swatch" style="background: #38bdf8;" onclick="setColor('#38bdf8', this)"></div>
+      <div class="color-swatch" style="background: #f472b6;" onclick="setColor('#f472b6', this)"></div>
+      <div class="color-swatch" style="background: #facc15;" onclick="setColor('#facc15', this)"></div>
+      <div class="color-swatch" style="background: #ef4444;" onclick="setColor('#ef4444', this)"></div>
+      <div class="color-swatch" style="background: #4ade80;" onclick="setColor('#4ade80', this)"></div>
+    </div>
+
+    <!-- 4 Aesthetic Page Styles -->
+    <div class="tool-group">
+      <select id="page-style-select" onchange="setPageStyle(this.value)">
+        <option value="black-lined" selected>📓 Black Lined</option>
+        <option value="tan-red-lined">📜 Tan + Red Lines</option>
+        <option value="black-blank">⬛ Black Blank</option>
+        <option value="white-blank">⬜ White Blank</option>
+      </select>
+    </div>
+
+    <!-- Zoom Pad Toggle & Undo/Redo -->
+    <div class="tool-group">
+      <button id="btn-zoom-pad" class="zoom-btn active" onclick="toggleZoomPad()">🔍 Zoom Pad</button>
+      <button onclick="undo()" title="Undo">↩️</button>
+      <button onclick="redo()" title="Redo">↪️</button>
+      <button onclick="clearPage()" title="Clear Current Page">🗑️</button>
+      <button id="btn-install-pwa" style="display:none; background:#ec4899; border-color:#f9a8d4;" onclick="installPWA()">📲 Install</button>
+    </div>
+  </div>
+
+  <!-- Main Notebook Stage -->
+  <div id="stage">
+    <canvas id="bg-canvas"></canvas>
+    <canvas id="ink-canvas"></canvas>
+    <canvas id="ui-canvas"></canvas>
+  </div>
+
+  <!-- Side-Mounted Page Navigator (1 to 100) -->
+  <div class="side-page-dock" id="side-page-dock">
+    <button onclick="changePage(-1)" title="Previous Page">▲</button>
+    <div class="side-page-indicator" onclick="jumpToPagePrompt()" id="page-label">PAGE 1 / 100</div>
+    <button onclick="changePage(1)" title="Next Page">▼</button>
+  </div>
+
+  <!-- Bottom Zoom Writing Pad -->
+  <div id="zoom-pad-container">
+    <div class="zoom-pad-header">
+      <span>✦ S H I B U I Zoom Pad (Drag pink box or use buttons)</span>
+      <div style="display:flex; gap:5px;">
+        <button onclick="moveZoomTarget(-110, 0)">◀ Left</button>
+        <button onclick="moveZoomTarget(110, 0)">Right ▶</button>
+        <button onclick="moveZoomTarget(-9999, 32)">⏎ Next Line</button>
+      </div>
+    </div>
+    <div id="zoom-canvas-wrap">
+      <canvas id="zoom-canvas"></canvas>
+    </div>
+  </div>
+
+  <!-- In-App Saved Notebooks Library Modal -->
+  <div id="library-modal">
+    <div class="library-card">
+      <div class="library-header">
+        <h2>📚 S H I B U I ✦ Saved Notebooks</h2>
+        <div style="display:flex; gap:8px;">
+          <button onclick="createNewNotebook()" style="background:#ec4899; border-color:#f9a8d4;">+ New Notebook</button>
+          <button onclick="document.getElementById('load-file').click()" style="background:#3b82f6;">📂 Import File</button>
+          <button onclick="closeLibraryModal()" style="background:#334155;">✖ Close</button>
+          <input type="file" id="load-file" style="display:none" accept=".shibui,.buibui,.snotes" onchange="importNotebookFile(event)">
+        </div>
+      </div>
+      <div class="library-body" id="library-list">
+        <!-- Populated dynamically from IndexedDB -->
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="status-toast"></div>
+
+  <script>
+    const TOTAL_PAGES = 100;
+    const MM_TO_PX = 3.78;
+
+    const stage = document.getElementById('stage');
+    const bgCanvas = document.getElementById('bg-canvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    const inkCanvas = document.getElementById('ink-canvas');
+    const ctx = inkCanvas.getContext('2d');
+    const uiCanvas = document.getElementById('ui-canvas');
+    const uiCtx = uiCanvas.getContext('2d');
+
+    const zoomContainer = document.getElementById('zoom-pad-container');
+    const zoomWrap = document.getElementById('zoom-canvas-wrap');
+    const zoomCanvas = document.getElementById('zoom-canvas');
+    const zoomCtx = zoomCanvas.getContext('2d');
+
+    const pageLabel = document.getElementById('page-label');
+    const sizeSlider = document.getElementById('size-slider');
+    const mmLabel = document.getElementById('mm-label');
+    const pageStyleSelect = document.getElementById('page-style-select');
+    const currentNoteNameEl = document.getElementById('current-note-name');
+
+    // Tool & Thickness State
+    let currentTool = 'pen'; // 'pen', 'highlighter', 'eraser'
+    let penMM = 1.0;
+    let highlighterMM = 4.5;
+    let eraserMM = 6.0;
+    let penColor = '#ffffff';
+    let pageStyle = 'black-lined';
+
+    // Zoom Pad State
+    let zoomPadActive = true;
+    let zoomBox = { x: 55, y: 68, w: 260, h: 75 };
+    let draggingZoomBoxId = null;
+
+    // 100-Page Smart Tracking State
+    let currentNotebookId = 'note_' + Date.now();
+    let currentNotebookTitle = 'Notebook #1';
+    const pagesData = new Array(TOTAL_PAGES).fill(null);
+    const pagesStyle = new Array(TOTAL_PAGES).fill('black-lined');
+    const pageHasInk = new Array(TOTAL_PAGES).fill(false); // Tracks which pages have writing!
+    let currentPageIndex = 0;
+
+    // Undo / Redo Stack
+    let history = [];
+    let redoStack = [];
+    const MAX_HISTORY = 20;
+
+    let mainPenId = null;
+    let mainPts = [];
+
+    function initCanvases() {
+      const dpr = window.devicePixelRatio || 1;
+      const w = stage.clientWidth;
+      const h = stage.clientHeight;
+
+      const savedInk = inkCanvas.width > 0 ? inkCanvas.toDataURL() : null;
+
+      [bgCanvas, inkCanvas, uiCanvas].forEach(c => {
+        c.width = w * dpr;
+        c.height = h * dpr;
+      });
+
+      bgCtx.scale(dpr, dpr);
+      ctx.scale(dpr, dpr);
+      uiCtx.scale(dpr, dpr);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      drawAnimeNotebookBackground(bgCtx, w, h, pageStyle, currentPageIndex);
+
+      if (savedInk) {
+        drawDataURLToInk(savedInk, () => {
+          if (zoomPadActive) initZoomCanvas();
+        });
+      } else {
+        saveHistory(false);
+        if (zoomPadActive) initZoomCanvas();
+      }
+      renderUIOverlay();
+    }
+
+    window.addEventListener('resize', initCanvases);
+    initCanvases();
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(t.timer);
+      t.timer = setTimeout(() => t.style.opacity = '0', 2500);
+    }
+
+    // =========================================================================
+    // SMART PAGE 1-TO-N DETECTION
+    // Finds the highest page index that has actual writing on it!
+    // =========================================================================
+    function getLastWrittenPageIndex() {
+      saveCurrentPageToMemory();
+      for (let i = TOTAL_PAGES - 1; i >= 0; i--) {
+        if (pageHasInk[i]) return i;
+      }
+      return 0; // Default to Page 1 if notebook is blank
+    }
+
+    function updatePageIndicatorLabel() {
+      const lastWritten = getLastWrittenPageIndex() + 1;
+      pageLabel.textContent = `PAGE ${currentPageIndex + 1} / ${TOTAL_PAGES} (WRITTEN: 1–${lastWritten})`;
+    }
+
+    // =========================================================================
+    // ANIME NOTEBOOK PAGE RENDERER (4 AESTHETIC STYLES)
+    // =========================================================================
+    function drawAnimeNotebookBackground(targetCtx, w, h, styleToDraw = pageStyle, pageIdx = currentPageIndex) {
+      targetCtx.save();
+
+      if (styleToDraw === 'black-blank') {
+        targetCtx.fillStyle = '#0f0e17';
+        targetCtx.fillRect(0, 0, w, h);
+      } else if (styleToDraw === 'white-blank') {
+        targetCtx.fillStyle = '#fafaf9';
+        targetCtx.fillRect(0, 0, w, h);
+      } else if (styleToDraw === 'black-lined') {
+        targetCtx.fillStyle = '#110f1b';
+        targetCtx.fillRect(0, 0, w, h);
+
+        targetCtx.strokeStyle = 'rgba(244, 114, 182, 0.45)';
+        targetCtx.lineWidth = 1.5;
+        targetCtx.beginPath();
+        targetCtx.moveTo(0, 48);
+        targetCtx.lineTo(w, 48);
+        targetCtx.moveTo(0, 52);
+        targetCtx.lineTo(w, 52);
+        targetCtx.stroke();
+
+        targetCtx.strokeStyle = 'rgba(148, 163, 184, 0.16)';
+        targetCtx.lineWidth = 1;
+        for (let y = 84; y < h; y += 32) {
+          targetCtx.beginPath();
+          targetCtx.moveTo(0, y);
+          targetCtx.lineTo(w, y);
+          targetCtx.stroke();
+        }
+
+        targetCtx.strokeStyle = 'rgba(244, 63, 94, 0.45)';
+        targetCtx.lineWidth = 1.5;
+        targetCtx.beginPath();
+        targetCtx.moveTo(46, 0);
+        targetCtx.lineTo(46, h);
+        targetCtx.stroke();
+
+        targetCtx.fillStyle = 'rgba(244, 114, 182, 0.55)';
+        targetCtx.font = '700 11px sans-serif';
+        targetCtx.fillText('S H I B U I ✦ CAMPUS NOTE', 58, 34);
+        targetCtx.fillText(`NO. ${String(pageIdx + 1).padStart(3, '0')}   DATE: ____/____`, Math.max(210, w - 210), 34);
+
+      } else if (styleToDraw === 'tan-red-lined') {
+        targetCtx.fillStyle = '#f5ebd6';
+        targetCtx.fillRect(0, 0, w, h);
+
+        targetCtx.strokeStyle = 'rgba(220, 38, 38, 0.65)';
+        targetCtx.lineWidth = 1.5;
+        targetCtx.beginPath();
+        targetCtx.moveTo(0, 48);
+        targetCtx.lineTo(w, 48);
+        targetCtx.moveTo(0, 52);
+        targetCtx.lineTo(w, 52);
+        targetCtx.stroke();
+
+        targetCtx.strokeStyle = 'rgba(220, 38, 38, 0.28)';
+        targetCtx.lineWidth = 1;
+        for (let y = 84; y < h; y += 32) {
+          targetCtx.beginPath();
+          targetCtx.moveTo(0, y);
+          targetCtx.lineTo(w, y);
+          targetCtx.stroke();
+        }
+
+        targetCtx.strokeStyle = 'rgba(220, 38, 38, 0.55)';
+        targetCtx.lineWidth = 1.5;
+        targetCtx.beginPath();
+        targetCtx.moveTo(46, 0);
+        targetCtx.lineTo(46, h);
+        targetCtx.stroke();
+
+        targetCtx.fillStyle = 'rgba(185, 28, 28, 0.65)';
+        targetCtx.font = '700 11px sans-serif';
+        targetCtx.fillText('S H I B U I ✦ 渋い・ノート', 58, 34);
+        targetCtx.fillText(`PAGE ${String(pageIdx + 1).padStart(2, '0')} / 100`, Math.max(210, w - 160), 34);
+      }
+
+      targetCtx.restore();
+    }
+
+    function setPageStyle(style, skipAutoColor = false) {
+      const wasDark = pageStyle.startsWith('black');
+      const isDark = style.startsWith('black');
+
+      pageStyle = style;
+      pagesStyle[currentPageIndex] = style;
+      pageStyleSelect.value = style;
+
+      const swatchWhite = document.getElementById('swatch-white');
+      const swatchBlack = document.getElementById('swatch-black');
+      if (!skipAutoColor && wasDark !== isDark) {
+        if (!isDark && penColor.toLowerCase() === '#ffffff') {
+          setColor('#1e1b2e', swatchBlack, true);
+        } else if (isDark && penColor.toLowerCase() === '#1e1b2e') {
+          setColor('#ffffff', swatchWhite, true);
+        }
+      }
+
+      drawAnimeNotebookBackground(bgCtx, stage.clientWidth, stage.clientHeight, pageStyle, currentPageIndex);
+      syncZoomPadView();
+      renderUIOverlay();
+    }
+
+    // =========================================================================
+    // TOOLS: BALLPOINT PEN (0.5mm - 5.0mm), HIGHLIGHTER & ERASER
+    // =========================================================================
+    function setTool(tool) {
+      currentTool = tool;
+      document.getElementById('btn-pen').classList.toggle('active', tool === 'pen');
+      document.getElementById('btn-highlighter').classList.toggle('active', tool === 'highlighter');
+      document.getElementById('btn-eraser').classList.toggle('active', tool === 'eraser');
+
+      if (tool === 'pen') {
+        sizeSlider.min = '0.5';
+        sizeSlider.max = '5.0';
+        sizeSlider.step = '0.1';
+        sizeSlider.value = penMM;
+        updateMMDisplay(penMM);
+      } else if (tool === 'highlighter') {
+        sizeSlider.min = '2.0';
+        sizeSlider.max = '15.0';
+        sizeSlider.step = '0.5';
+        sizeSlider.value = highlighterMM;
+        updateMMDisplay(highlighterMM);
+      } else {
+        sizeSlider.min = '2.0';
+        sizeSlider.max = '15.0';
+        sizeSlider.step = '0.5';
+        sizeSlider.value = eraserMM;
+        updateMMDisplay(eraserMM);
+      }
+    }
+
+    function setQuickMM(mmVal) {
+      if (currentTool === 'pen') {
+        penMM = mmVal;
+        sizeSlider.value = mmVal;
+        updateMMDisplay(mmVal);
+      } else if (currentTool === 'highlighter') {
+        highlighterMM = Math.min(15, Math.max(2, mmVal * 3));
+        sizeSlider.value = highlighterMM;
+        updateMMDisplay(highlighterMM);
+      } else {
+        eraserMM = Math.min(15, Math.max(2, mmVal * 3));
+        sizeSlider.value = eraserMM;
+        updateMMDisplay(eraserMM);
+      }
+
+      document.querySelectorAll('.mm-chip').forEach(btn => {
+        btn.classList.toggle('active', parseFloat(btn.textContent) === mmVal);
+      });
+    }
+
+    function onSliderChange(val) {
+      const num = parseFloat(val);
+      if (currentTool === 'pen') penMM = num;
+      else if (currentTool === 'highlighter') highlighterMM = num;
+      else eraserMM = num;
+
+      updateMMDisplay(num);
+      document.querySelectorAll('.mm-chip').forEach(btn => {
+        btn.classList.toggle('active', Math.abs(parseFloat(btn.textContent) - num) < 0.05);
+      });
+    }
+
+    function updateMMDisplay(val) {
+      mmLabel.textContent = `${Number(val).toFixed(1)}mm`;
+    }
+
+    function setColor(color, el, keepTool = false) {
+      penColor = color;
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+      if (el) el.classList.add('active');
+      if (!keepTool && currentTool === 'eraser') setTool('pen');
+    }
+
+    // =========================================================================
+    // BALLPOINT & HIGHLIGHTER STROKE ENGINE
+    // =========================================================================
+    function drawStrokeSegment(pts) {
+      if (currentTool !== 'eraser') {
+        pageHasInk[currentPageIndex] = true; // Mark this page as written!
+      }
+
+      ctx.save();
+      if (currentTool === 'eraser') {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.lineWidth = eraserMM * MM_TO_PX;
+        ctx.lineCap = 'round';
+      } else if (currentTool === 'highlighter') {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = penColor;
+        ctx.fillStyle = penColor;
+        ctx.globalAlpha = 0.045;
+        ctx.lineWidth = highlighterMM * MM_TO_PX;
+        ctx.lineCap = 'square';
+      } else {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = penColor;
+        ctx.fillStyle = penColor;
+        ctx.globalAlpha = 1.0;
+        ctx.lineWidth = penMM * MM_TO_PX;
+        ctx.lineCap = 'round';
+      }
+
+      const len = pts.length;
+      if (len === 1) {
+        ctx.beginPath();
+        ctx.arc(pts[0].x, pts[0].y, ctx.lineWidth / 2, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (len === 2) {
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        ctx.lineTo(pts[1].x, pts[1].y);
+        ctx.stroke();
+      } else {
+        const p1 = pts[len - 3];
+        const p2 = pts[len - 2];
+        const p3 = pts[len - 1];
+        const mid1 = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+        const mid2 = { x: (p2.x + p3.x) / 2, y: (p2.y + p3.y) / 2 };
+
+        ctx.beginPath();
+        ctx.moveTo(mid1.x, mid1.y);
+        ctx.quadraticCurveTo(p2.x, p2.y, mid2.x, mid2.y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // =========================================================================
+    // ZOOM WRITING PAD ENGINE
+    // =========================================================================
+    function toggleZoomPad() {
+      zoomPadActive = !zoomPadActive;
+      const btn = document.getElementById('btn-zoom-pad');
+      btn.classList.toggle('active', zoomPadActive);
+      zoomContainer.style.display = zoomPadActive ? 'flex' : 'none';
+
+      if (zoomPadActive) initZoomCanvas();
+      renderUIOverlay();
+    }
+
+    function initZoomCanvas() {
+      if (!zoomPadActive) return;
+      const dpr = window.devicePixelRatio || 1;
+      const zw = zoomWrap.clientWidth;
+      const zh = zoomWrap.clientHeight;
+      if (zw === 0 || zh === 0) return;
+
+      zoomCanvas.width = zw * dpr;
+      zoomCanvas.height = zh * dpr;
+      zoomCtx.scale(dpr, dpr);
+      zoomCtx.lineCap = 'round';
+      zoomCtx.lineJoin = 'round';
+
+      zoomBox.w = Math.min(stage.clientWidth - 90, Math.round(zw * 0.48));
+      zoomBox.h = Math.round(zh * 0.48);
+      syncZoomPadView();
+    }
+
+    function syncZoomPadView() {
+      if (!zoomPadActive) return;
+      const zw = zoomWrap.clientWidth;
+      const zh = zoomWrap.clientHeight;
+      const dpr = window.devicePixelRatio || 1;
+
+      zoomCtx.clearRect(0, 0, zw, zh);
+      zoomCtx.drawImage(
+        bgCanvas,
+        zoomBox.x * dpr, zoomBox.y * dpr, zoomBox.w * dpr, zoomBox.h * dpr,
+        0, 0, zw, zh
+      );
+      zoomCtx.drawImage(
+        inkCanvas,
+        zoomBox.x * dpr, zoomBox.y * dpr, zoomBox.w * dpr, zoomBox.h * dpr,
+        0, 0, zw, zh
+      );
+    }
+
+    function moveZoomTarget(dx, dy) {
+      if (dx === -9999) {
+        zoomBox.x = 55;
+      } else {
+        zoomBox.x = Math.max(10, Math.min(stage.clientWidth - zoomBox.w - 60, zoomBox.x + dx));
+      }
+      zoomBox.y = Math.max(20, Math.min(stage.clientHeight - zoomBox.h - 220, zoomBox.y + dy));
+      renderUIOverlay();
+      syncZoomPadView();
+    }
+
+    let zoomPenId = null;
+    let zoomPts = [];
+
+    zoomCanvas.addEventListener('touchstart', (e) => {
+      if (e.cancelable) e.preventDefault();
+      e.stopPropagation();
+      if (zoomPenId !== null) return;
+
+      const t = e.changedTouches[0];
+      zoomPenId = t.identifier;
+      const rect = zoomCanvas.getBoundingClientRect();
+      zoomPts = [{ x: t.clientX - rect.left, y: t.clientY - rect.top }];
+      drawFromZoomPad(zoomPts);
+    }, { passive: false });
+
+    zoomCanvas.addEventListener('touchmove', (e) => {
+      if (e.cancelable) e.preventDefault();
+      e.stopPropagation();
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        const t = e.changedTouches[i];
+        if (t.identifier === zoomPenId) {
+          const rect = zoomCanvas.getBoundingClientRect();
+          zoomPts.push({ x: t.clientX - rect.left, y: t.clientY - rect.top });
+          drawFromZoomPad(zoomPts);
+        }
+      }
+    }, { passive: false });
+
+    function finishZoomStroke(e) {
+      if (e.cancelable) e.preventDefault();
+      e.stopPropagation();
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === zoomPenId) {
+          zoomPenId = null;
+          zoomPts = [];
+          saveHistory(true);
+        }
+      }
+    }
+    zoomCanvas.addEventListener('touchend', finishZoomStroke, { passive: false });
+    zoomCanvas.addEventListener('touchcancel', finishZoomStroke, { passive: false });
+
+    function drawFromZoomPad(zPts) {
+      const zw = zoomWrap.clientWidth;
+      const zh = zoomWrap.clientHeight;
+      const scaleX = zoomBox.w / zw;
+      const scaleY = zoomBox.h / zh;
+
+      const mappedPts = zPts.map(p => ({
+        x: zoomBox.x + p.x * scaleX,
+        y: zoomBox.y + p.y * scaleY
+      }));
+
+      drawStrokeSegment(mappedPts);
+      syncZoomPadView();
+    }
+
+    // =========================================================================
+    // MAIN CANVAS TOUCH & ZOOM-BOX DRAGGING
+    // =========================================================================
+    function getStageCoords(touch) {
+      const rect = inkCanvas.getBoundingClientRect();
+      return {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top
+      };
+    }
+
+    inkCanvas.addEventListener('touchstart', (e) => {
+      if (e.cancelable) e.preventDefault();
+      if (mainPenId !== null || draggingZoomBoxId !== null) return;
+
+      const t = e.changedTouches[0];
+      const pt = getStageCoords(t);
+
+      if (
+        zoomPadActive &&
+        pt.x >= zoomBox.x && pt.x <= zoomBox.x + zoomBox.w &&
+        pt.y >= zoomBox.y - 24 && pt.y <= zoomBox.y + 20
+      ) {
+        draggingZoomBoxId = t.identifier;
+        return;
+      }
+
+      mainPenId = t.identifier;
+      mainPts = [pt];
+      drawStrokeSegment(mainPts);
+      syncZoomPadView();
+    }, { passive: false });
+
+    inkCanvas.addEventListener('touchmove', (e) => {
+      if (e.cancelable) e.preventDefault();
+
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        const t = e.changedTouches[i];
+        const pt = getStageCoords(t);
+
+        if (t.identifier === draggingZoomBoxId) {
+          zoomBox.x = Math.max(10, Math.min(stage.clientWidth - zoomBox.w - 60, pt.x - zoomBox.w / 2));
+          zoomBox.y = Math.max(20, Math.min(stage.clientHeight - zoomBox.h - 220, pt.y));
+          renderUIOverlay();
+          syncZoomPadView();
+          return;
+        }
+
+        if (t.identifier === mainPenId) {
+          mainPts.push(pt);
+          drawStrokeSegment(mainPts);
+          syncZoomPadView();
+        }
+      }
+    }, { passive: false });
+
+    function finishMainTouch(e) {
+      if (e.cancelable) e.preventDefault();
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        const id = e.changedTouches[i].identifier;
+        if (id === draggingZoomBoxId) draggingZoomBoxId = null;
+        if (id === mainPenId) {
+          mainPenId = null;
+          mainPts = [];
+          saveHistory(true);
+        }
+      }
+    }
+    inkCanvas.addEventListener('touchend', finishMainTouch, { passive: false });
+    inkCanvas.addEventListener('touchcancel', finishMainTouch, { passive: false });
+
+    function renderUIOverlay() {
+      uiCtx.clearRect(0, 0, stage.clientWidth, stage.clientHeight);
+      if (!zoomPadActive) return;
+
+      uiCtx.save();
+      uiCtx.strokeStyle = '#f472b6';
+      uiCtx.fillStyle = 'rgba(244, 114, 182, 0.08)';
+      uiCtx.lineWidth = 2;
+      uiCtx.fillRect(zoomBox.x, zoomBox.y, zoomBox.w, zoomBox.h);
+      uiCtx.strokeRect(zoomBox.x, zoomBox.y, zoomBox.w, zoomBox.h);
+
+      uiCtx.fillStyle = '#ec4899';
+      uiCtx.beginPath();
+      uiCtx.roundRect(zoomBox.x, zoomBox.y - 18, 155, 18, [6, 6, 0, 0]);
+      uiCtx.fill();
+
+      uiCtx.fillStyle = '#ffffff';
+      uiCtx.font = '700 10px sans-serif';
+      uiCtx.fillText('✦ DRAG ZOOM BOX HERE', zoomBox.x + 8, zoomBox.y - 5);
+      uiCtx.restore();
+    }
+
+    // =========================================================================
+    // 100-PAGE NAVIGATION & HISTORY
+    // =========================================================================
+    function saveCurrentPageToMemory() {
+      if (pageHasInk[currentPageIndex]) {
+        pagesData[currentPageIndex] = inkCanvas.toDataURL();
+      } else {
+        pagesData[currentPageIndex] = null;
+      }
+      pagesStyle[currentPageIndex] = pageStyle;
+    }
+
+    function changePage(delta) {
+      const next = currentPageIndex + delta;
+      if (next < 0 || next >= TOTAL_PAGES) {
+        return showToast(`Reached Page ${next < 0 ? 1 : TOTAL_PAGES}`);
+      }
+      goToPage(next);
+    }
+
+    function goToPage(index) {
+      saveCurrentPageToMemory();
+      currentPageIndex = index;
+
+      setPageStyle(pagesStyle[currentPageIndex] || pageStyle, true);
+      ctx.clearRect(0, 0, stage.clientWidth, stage.clientHeight);
+      history = [];
+      redoStack = [];
+
+      if (pagesData[currentPageIndex]) {
+        drawDataURLToInk(pagesData[currentPageIndex], () => {
+          saveHistory(false);
+          syncZoomPadView();
+          updatePageIndicatorLabel();
+        });
+      } else {
+        saveHistory(false);
+        syncZoomPadView();
+        updatePageIndicatorLabel();
+      }
+    }
+
+    function jumpToPagePrompt() {
+      const lastW = getLastWrittenPageIndex() + 1;
+      const num = parseInt(prompt(`Jump to Page (1 - ${TOTAL_PAGES})\nCurrently written: Pages 1 to ${lastW}`, currentPageIndex + 1), 10);
+      if (num >= 1 && num <= TOTAL_PAGES) goToPage(num - 1);
+    }
+
+    function saveHistory(markAsWritten = true) {
+      if (markAsWritten) pageHasInk[currentPageIndex] = true;
+      if (history.length >= MAX_HISTORY) history.shift();
+      const snap = inkCanvas.toDataURL();
+      history.push(snap);
+      if (pageHasInk[currentPageIndex]) {
+        pagesData[currentPageIndex] = snap;
+      }
+      redoStack = [];
+      updatePageIndicatorLabel();
+    }
+
+    function drawDataURLToInk(dataUrl, cb) {
+      const img = new Image();
+      img.onload = () => {
+        ctx.clearRect(0, 0, stage.clientWidth, stage.clientHeight);
+        ctx.drawImage(img, 0, 0, stage.clientWidth, stage.clientHeight);
+        if (cb) cb();
+      };
+      img.src = dataUrl;
+    }
+
+    function undo() {
+      if (history.length <= 1) return showToast('Nothing to undo');
+      redoStack.push(history.pop());
+      const snap = history[history.length - 1];
+      pagesData[currentPageIndex] = snap;
+      drawDataURLToInk(snap, () => syncZoomPadView());
+    }
+
+    function redo() {
+      if (redoStack.length === 0) return showToast('Nothing to redo');
+      const snap = redoStack.pop();
+      history.push(snap);
+      pagesData[currentPageIndex] = snap;
+      drawDataURLToInk(snap, () => syncZoomPadView());
+    }
+
+    function clearPage() {
+      ctx.clearRect(0, 0, stage.clientWidth, stage.clientHeight);
+      pageHasInk[currentPageIndex] = false;
+      pagesData[currentPageIndex] = null;
+      saveHistory(false);
+      syncZoomPadView();
+      showToast(`Page ${currentPageIndex + 1} cleared`);
+    }
+
+    // =========================================================================
+    // HELPER: RENDERS ANY PAGE (0..99) TO AN OFF-SCREEN CANVAS FOR EXPORT
+    // =========================================================================
+    function renderSinglePageCanvas(pageIdx) {
+      return new Promise((resolve) => {
+        const dpr = window.devicePixelRatio || 1;
+        const w = stage.clientWidth;
+        const h = stage.clientHeight;
+
+        const off = document.createElement('canvas');
+        off.width = w * dpr;
+        off.height = h * dpr;
+        const oCtx = off.getContext('2d');
+        oCtx.scale(dpr, dpr);
+
+        const pStyle = pagesStyle[pageIdx] || pageStyle;
+        drawAnimeNotebookBackground(oCtx, w, h, pStyle, pageIdx);
+
+        const inkData = pagesData[pageIdx];
+        if (inkData && pageHasInk[pageIdx]) {
+          const img = new Image();
+          img.onload = () => {
+            oCtx.drawImage(img, 0, 0, w, h);
+            resolve(off);
+          };
+          img.src = inkData;
+        } else {
+          resolve(off);
+        }
+      });
+    }
+
+    // =========================================================================
+    // 100% OFFLINE MULTI-PAGE PDF GENERATOR (EXPORTS PAGE 1 TO N)
+    // Pure Vanilla JS Binary PDF Builder — Works inside offline APK with 0 CDNs!
+    // =========================================================================
+    function dataURLToUint8Array(dataURL) {
+      const base64 = dataURL.split(',')[1];
+      const binStr = atob(base64);
+      const len = binStr.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binStr.charCodeAt(i);
+      }
+      return bytes;
+    }
+
+    async function exportWrittenPagesPDF() {
+      const lastPageIdx = getLastWrittenPageIndex();
+      const totalToExport = lastPageIdx + 1;
+      showToast(`Building PDF for Pages 1 to ${totalToExport}...`);
+
+      const pageJpegs = [];
+      let pxW = inkCanvas.width;
+      let pxH = inkCanvas.height;
+
+      for (let i = 0; i < totalToExport; i++) {
+        const pageCanv = await renderSinglePageCanvas(i);
+        pxW = pageCanv.width;
+        pxH = pageCanv.height;
+        const jpegUrl = pageCanv.toDataURL('image/jpeg', 0.88);
+        pageJpegs.push(dataURLToUint8Array(jpegUrl));
+      }
+
+      // PDF Page Dimensions in Points (A4-proportioned to screen aspect ratio)
+      const pdfW = 595.28;
+      const pdfH = Math.round((pxH / pxW) * pdfW * 100) / 100;
+
+      const encoder = new TextEncoder();
+      const chunks = [];
+      const offsets = [0]; // Object 0 offset
+      let byteLength = 0;
+
+      function pushStr(str) {
+        const arr = encoder.encode(str);
+        chunks.push(arr);
+        byteLength += arr.byteLength;
+      }
+
+      function pushBytes(uint8) {
+        chunks.push(uint8);
+        byteLength += uint8.byteLength;
+      }
+
+      function startObj(id) {
+        offsets[id] = byteLength;
+        pushStr(`${id} 0 obj\n`);
+      }
+
+      function endObj() {
+        pushStr(`\nendobj\n`);
+      }
+
+      pushStr(`%PDF-1.4\n%\xFF\xFF\xFF\xFF\n`);
+
+      // Object 1: Catalog
+      startObj(1);
+      pushStr(`<< /Type /Catalog /Pages 2 0 R >>`);
+      endObj();
+
+      // Object 2: Pages Root
+      const kidsRefs = [];
+      for (let i = 0; i < totalToExport; i++) {
+        kidsRefs.push(`${3 + i * 3} 0 R`);
+      }
+      startObj(2);
+      pushStr(`<< /Type /Pages /Kids [ ${kidsRefs.join(' ')} ] /Count ${totalToExport} >>`);
+      endObj();
+
+      // Objects 3..N: Each Page has (PageObj, ImageXObject, ContentStream)
+      for (let i = 0; i < totalToExport; i++) {
+        const pageObjId = 3 + i * 3;
+        const imgObjId = 4 + i * 3;
+        const contentObjId = 5 + i * 3;
+        const jpegBytes = pageJpegs[i];
+
+        // Page Object
+        startObj(pageObjId);
+        pushStr(`<< /Type /Page /Parent 2 0 R /Resources << /XObject << /Im0 ${imgObjId} 0 R >> >> /MediaBox [0 0 ${pdfW} ${pdfH}] /Contents ${contentObjId} 0 R >>`);
+        endObj();
+
+        // Image XObject
+        startObj(imgObjId);
+        pushStr(`<< /Type /XObject /Subtype /Image /Width ${pxW} /Height ${pxH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBytes.byteLength} >>\nstream\n`);
+        pushBytes(jpegBytes);
+        pushStr(`\nendstream`);
+        endObj();
+
+        // Content Stream
+        const cmd = `q ${pdfW} 0 0 ${pdfH} 0 0 cm /Im0 Do Q`;
+        startObj(contentObjId);
+        pushStr(`<< /Length ${cmd.length} >>\nstream\n${cmd}\nendstream`);
+        endObj();
+      }
+
+      const totalObjects = 3 + totalToExport * 3;
+      const xrefOffset = byteLength;
+
+      pushStr(`xref\n0 ${totalObjects}\n0000000000 65535 f \n`);
+      for (let id = 1; id < totalObjects; id++) {
+        const padded = String(offsets[id]).padStart(10, '0');
+        pushStr(`${padded} 00000 n \n`);
+      }
+
+      pushStr(`trailer\n<< /Size ${totalObjects} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`);
+
+      const pdfBlob = new Blob(chunks, { type: 'application/pdf' });
+      const a = document.createElement('a');
+      a.download = `${currentNotebookTitle.replace(/\s+/g, '-')}-Pages-1-to-${totalToExport}.pdf`;
+      a.href = URL.createObjectURL(pdfBlob);
+      a.click();
+
+      showToast(`Exported Pages 1 to ${totalToExport} as PDF!`);
+    }
+
+    // =========================================================================
+    // SMART MULTI-PAGE PNG EXPORTER (EXPORTS PAGE 1 TO N)
+    // Stitches Pages 1..N into a crisp multi-page vertical PNG!
+    // =========================================================================
+    async function exportWrittenPagesPNG() {
+      const lastPageIdx = getLastWrittenPageIndex();
+      const totalToExport = lastPageIdx + 1;
+      showToast(`Generating PNG for Pages 1 to ${totalToExport}...`);
+
+      const renderedCanvases = [];
+      for (let i = 0; i < totalToExport; i++) {
+        renderedCanvases.push(await renderSinglePageCanvas(i));
+      }
+
+      const singleW = renderedCanvases[0].width;
+      const singleH = renderedCanvases[0].height;
+      const gap = 16;
+
+      const combined = document.createElement('canvas');
+      combined.width = singleW;
+      combined.height = singleH * totalToExport + gap * (totalToExport - 1);
+      const cCtx = combined.getContext('2d');
+
+      cCtx.fillStyle = '#09080f';
+      cCtx.fillRect(0, 0, combined.width, combined.height);
+
+      for (let i = 0; i < totalToExport; i++) {
+        cCtx.drawImage(renderedCanvases[i], 0, i * (singleH + gap));
+      }
+
+      const a = document.createElement('a');
+      a.download = `${currentNotebookTitle.replace(/\s+/g, '-')}-Pages-1-to-${totalToExport}.png`;
+      a.href = combined.toDataURL('image/png');
+      a.click();
+
+      showToast(`Saved Pages 1 to ${totalToExport} as PNG!`);
+    }
+
+    // =========================================================================
+    // IN-APP EDITABLE NOTEBOOK LIBRARY (INDEXEDDB OFFLINE STORAGE)
+    // Lets you save, view, reopen, and edit all your notebooks inside SHIBUI!
+    // =========================================================================
+    function openShibuiDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('ShibuiNotebooksDB', 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('notebooks')) {
+            db.createObjectStore('notebooks', { keyPath: 'id' });
+          }
+        };
+        req.onsuccess = (e) => resolve(e.target.result);
+        req.onerror = (e) => reject(e.target.error);
+      });
+    }
+
+    async function saveToAppLibrary(silent = false) {
+      saveCurrentPageToMemory();
+      if (!silent) {
+        const askedTitle = prompt('Save Notebook to SHIBUI Library as:', currentNotebookTitle);
+        if (!askedTitle) return;
+        currentNotebookTitle = askedTitle.trim() || currentNotebookTitle;
+        currentNoteNameEl.textContent = `渋い ✦ ${currentNotebookTitle.slice(0, 12)}`;
+      }
+
+      const lastPage = getLastWrittenPageIndex();
+      // Only store up to the last written page to keep storage fast and compact
+      const trimmedPagesData = pagesData.slice(0, lastPage + 1);
+      const trimmedPagesStyle = pagesStyle.slice(0, lastPage + 1);
+      const trimmedHasInk = pageHasInk.slice(0, lastPage + 1);
+
+      const record = {
+        id: currentNotebookId,
+        title: currentNotebookTitle,
+        updatedAt: Date.now(),
+        writtenPageCount: lastPage + 1,
+        currentPageIndex,
+        pagesData: trimmedPagesData,
+        pagesStyle: trimmedPagesStyle,
+        pageHasInk: trimmedHasInk
+      };
+
+      try {
+        const db = await openShibuiDB();
+        const tx = db.transaction('notebooks', 'readwrite');
+        tx.objectStore('notebooks').put(record);
+        tx.oncomplete = () => {
+          if (!silent) {
+            showToast(`Saved "${currentNotebookTitle}" (Pages 1–${lastPage + 1}) to App Library!`);
+          }
+        };
+      } catch (err) {
+        showToast('Could not save to library');
+      }
+    }
+
+    async function openLibraryModal() {
+      // Auto-save current progress silently before showing library
+      await saveToAppLibrary(true);
+      await renderLibraryList();
+      document.getElementById('library-modal').style.display = 'flex';
+    }
+
+    function closeLibraryModal() {
+      document.getElementById('library-modal').style.display = 'none';
+    }
+
+    async function renderLibraryList() {
+      const listEl = document.getElementById('library-list');
+      listEl.innerHTML = '<div style="color:#a78bfa; text-align:center; padding:20px;">Loading saved notebooks...</div>';
+
+      try {
+        const db = await openShibuiDB();
+        const tx = db.transaction('notebooks', 'readonly');
+        const req = tx.objectStore('notebooks').getAll();
+
+        req.onsuccess = () => {
+          const items = (req.result || []).sort((a, b) => b.updatedAt - a.updatedAt);
+          if (items.length === 0) {
+            listEl.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:24px;">No saved notebooks yet. Tap <b>💾 Save</b> anytime!</div>';
+            return;
+          }
+
+          listEl.innerHTML = '';
+          items.forEach(item => {
+            const dateStr = new Date(item.updatedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+            const isCurrent = item.id === currentNotebookId;
+
+            const row = document.createElement('div');
+            row.className = 'note-item' + (isCurrent ? ' current-open' : '');
+            row.innerHTML = `
+              <div class="note-info" onclick="loadNotebookFromLibrary('${item.id}')">
+                <div class="note-title">📓 ${item.title} ${isCurrent ? '<span style="color:#f472b6;font-size:11px;">(Currently Open)</span>' : ''}</div>
+                <div class="note-meta">Written: Pages 1 to ${item.writtenPageCount || 1} • Saved: ${dateStr}</div>
+              </div>
+              <div class="note-actions">
+                <button onclick="loadNotebookFromLibrary('${item.id}')" style="background:#059669; border-color:#34d399;">✏️ Open & Edit</button>
+                <button onclick="downloadBackupFile('${item.id}')" title="Download .shibui file">📁 File</button>
+                <button onclick="deleteNotebookFromLibrary('${item.id}')" style="background:#dc2626; border-color:#f87171;">🗑️</button>
+              </div>
+            `;
+            listEl.appendChild(row);
+          });
+        };
+      } catch (e) {
+        listEl.innerHTML = '<div style="color:#f87171;">Error loading library</div>';
+      }
+    }
+
+    async function loadNotebookFromLibrary(id) {
+      const db = await openShibuiDB();
+      const tx = db.transaction('notebooks', 'readonly');
+      const req = tx.objectStore('notebooks').get(id);
+      req.onsuccess = () => {
+        const data = req.result;
+        if (!data) return;
+        applyLoadedNotebookData(data);
+        closeLibraryModal();
+        showToast(`Opened "${data.title}" for editing!`);
+      };
+    }
+
+    function applyLoadedNotebookData(data) {
+      currentNotebookId = data.id || ('note_' + Date.now());
+      currentNotebookTitle = data.title || 'Untitled Note';
+      currentNoteNameEl.textContent = `渋い ✦ ${currentNotebookTitle.slice(0, 12)}`;
+
+      for (let i = 0; i < TOTAL_PAGES; i++) {
+        pagesData[i] = (data.pagesData && data.pagesData[i]) ? data.pagesData[i] : null;
+        pagesStyle[i] = (data.pagesStyle && data.pagesStyle[i]) ? data.pagesStyle[i] : 'black-lined';
+        pageHasInk[i] = (data.pageHasInk && data.pageHasInk[i]) ? true : Boolean(pagesData[i]);
+      }
+
+      goToPage(data.currentPageIndex || 0);
+    }
+
+    function createNewNotebook() {
+      const title = prompt('Enter name for your new Notebook:', `Notebook #${Math.floor(Math.random() * 90 + 10)}`);
+      if (!title) return;
+
+      currentNotebookId = 'note_' + Date.now();
+      currentNotebookTitle = title.trim();
+      currentNoteNameEl.textContent = `渋い ✦ ${currentNotebookTitle.slice(0, 12)}`;
+
+      for (let i = 0; i < TOTAL_PAGES; i++) {
+        pagesData[i] = null;
+        pagesStyle[i] = 'black-lined';
+        pageHasInk[i] = false;
+      }
+
+      ctx.clearRect(0, 0, stage.clientWidth, stage.clientHeight);
+      goToPage(0);
+      closeLibraryModal();
+      showToast(`Created "${currentNotebookTitle}"!`);
+    }
+
+    async function deleteNotebookFromLibrary(id) {
+      if (!confirm('Delete this saved notebook from SHIBUI library?')) return;
+      const db = await openShibuiDB();
+      const tx = db.transaction('notebooks', 'readwrite');
+      tx.objectStore('notebooks').delete(id);
+      tx.oncomplete = () => {
+        renderLibraryList();
+        showToast('Notebook deleted');
+      };
+    }
+
+    async function downloadBackupFile(id) {
+      const db = await openShibuiDB();
+      const tx = db.transaction('notebooks', 'readonly');
+      const req = tx.objectStore('notebooks').get(id);
+      req.onsuccess = () => {
+        const data = req.result;
+        if (!data) return;
+        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.download = `${data.title.replace(/\s+/g, '-')}-Pages-1-to-${data.writtenPageCount}.shibui`;
+        a.href = URL.createObjectURL(blob);
+        a.click();
+        showToast('Downloaded editable .shibui file!');
+      };
+    }
+
+    function importNotebookFile(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          data.id = 'note_' + Date.now();
+          data.title = data.title || file.name.replace(/\.[^/.]+$/, '');
+          data.updatedAt = Date.now();
+          applyLoadedNotebookData(data);
+          await saveToAppLibrary(true);
+          closeLibraryModal();
+          showToast(`Imported & opened "${data.title}"!`);
+        } catch (err) {
+          showToast('Invalid notebook file');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // =========================================================================
+    // OFFLINE PWA GENERATOR (AUTO-CREATES "S H I B U I" ANIME ICON & MANIFEST)
+    // =========================================================================
+    function generateShibuiIcon(size) {
+      const c = document.createElement('canvas');
+      c.width = size;
+      c.height = size;
+      const ic = c.getContext('2d');
+
+      const grad = ic.createLinearGradient(0, 0, size, size);
+      grad.addColorStop(0, '#1e1b4b');
+      grad.addColorStop(0.5, '#6b21a8');
+      grad.addColorStop(1, '#ec4899');
+      ic.fillStyle = grad;
+      ic.beginPath();
+      ic.roundRect(0, 0, size, size, size * 0.22);
+      ic.fill();
+
+      ic.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+      ic.lineWidth = size * 0.03;
+      ic.strokeRect(size * 0.06, size * 0.06, size * 0.88, size * 0.88);
+
+      ic.fillStyle = '#ffffff';
+      ic.textAlign = 'center';
+      ic.font = `900 ${Math.round(size * 0.16)}px sans-serif`;
+      ic.fillText('S H I B U I', size / 2, size * 0.48);
+
+      ic.fillStyle = '#fbcfe8';
+      ic.font = `700 ${Math.round(size * 0.09)}px sans-serif`;
+      ic.fillText('✦ 渋い・ノート ✦', size / 2, size * 0.65);
+
+      return c.toDataURL('image/png');
+    }
+
+    let deferredPrompt = null;
+
+    function setupPWA() {
+      const icon192 = generateShibuiIcon(192);
+      const icon512 = generateShibuiIcon(512);
+      document.getElementById('apple-icon').href = icon192;
+
+      const manifestObj = {
+        name: "S H I B U I ✦ Anime Notebook",
+        short_name: "SHIBUI",
+        description: "Offline Anime Notebook with Smart Page 1-to-N PDF Export & Editable Library",
+        start_url: "./index.html",
+        display: "standalone",
+        orientation: "any",
+        background_color: "#13111c",
+        theme_color: "#13111c",
+        icons: [
+          { src: icon192, sizes: "192x192", type: "image/png", purpose: "any maskable" },
+          { src: icon512, sizes: "512x512", type: "image/png", purpose: "any maskable" }
+        ]
+      };
+
+      const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
+      document.getElementById('pwa-manifest').href = URL.createObjectURL(manifestBlob);
+
+      if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      }
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('btn-install-pwa').style.display = 'flex';
+    });
+
+    function installPWA() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => {
+        deferredPrompt = null;
+        document.getElementById('btn-install-pwa').style.display = 'none';
+      });
+    }
+
+    setupPWA();
+  </script>
+</body>
+</html>
